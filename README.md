@@ -1,7 +1,3 @@
-# My drafts in the way of programming
+# Course drafts of ruby on rails in Interaje Institute
 * Just drafts
-'''
-   ruby
-   test
-'''
-   test
+* Some codes are not complete
