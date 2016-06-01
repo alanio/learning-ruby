@@ -181,6 +181,7 @@ rails g kaminari:views bootstrap3
 agora nao precisa usar o per()
 
 rails g kaminari:config
+configurar o padrão de 25: config/initializers/kaminari.rb
 
 ordenar lista de usuarios
 #<%= f.input :usuario_id, as: :select, collection: Usuario.all.order('NOME ASC').map{|u| ["#{u.nome} - {u.email}", u.id] }, prompt: 'Selcione suusario'
