@@ -7,7 +7,7 @@
 
 
 
-#criar projeto definindo a versão e o banco
+#criar projeto definindo a versão do rails e o banco
 rails _4.2.6_ new portal -d mysql
 
 =begin
@@ -20,7 +20,7 @@ rails _4.2.6_ new portal -d mysql
 bundle install
 
 #bd
-host: 127.0.0.1 #no linux, pode ser localhost
+host: 127.0.0.1 #no mac, ou < host: localhost > no linux
 rake db:create #criar banco
 rake db:migrate #atualizar banco    obs: probleminha no simple_form
 
@@ -49,58 +49,72 @@ rails g controller paginas principal
 #criar model usuario
 rails g scaffold usuarios nome email senha genero:integer #ja cria o resources e controller
 
-#eliminar arquivo scaffold.css em 
+#eliminar arquivo scaffold.scss em 
 	app/assets/stylesheets/
 
 #atualiza banco
 rake db:migrate
 
-#cria layout para model usuario
+#cria layout para resources usuarios
 rails g bootstrap:themed usuarios
 
-#clonar pasta lib seyhunak no git hube e jogar dentro da lib do projeto
+#baixar pasta lib do projeto https://github.com/seyhunak/twitter-bootstrap-rails
+#e jogar dentro da lib do projeto para poder editar o simple_form_for e não precisar
+#apagar erros span e alterar as classes do simple_form
+#se nao, apagar erros span do _form.html.erb; mudar pra 'form-vertical'; colocar inputs numa <div class 'form-actions'>, e o submit em uma <div clas='form-inputs'>
 
-#apagar erros span do _form.html.erb; mudar pra vertical; alterar para; div class form-actions, form-inputs
+#parar, reiniciar servidor
 
 #criar models editoria
 rails g scaffold editorias nome status:boolean
 
+#apagar app/assets/stylesheet/scaffold.scss
+
 #atualiza banco
 rake db:migrate
 
-#cria layout para model editoria
+#cria layout para resources editorias
 rails g bootstrap:themed editorias
 
 #incluir path no application.html.erb(layout)
 
-#apagar erros span do _form.html.erb, mudar pra vertical, alterar para <div class form-actions>, form-inputs
+#apagar erros span do _form.html.erb, mudar pra 'form-vertical', alterar para <div class form-actions>, form-inputs
 
-#//no _form de editoria
-#//collection: [[asd, true],[ass. false]] prompt
+#no _form de usuario, definir o tipo de botao do genero fazendo a collection
+#collection: [['Mesculino', 1],['Feminino', 0]] prompt 'Selecione'
+=begin
+	 <%= f.input :genero, as: :radio_buttons, collection: [['Masculino', 1], ['Feminino', 0]] %>
+=end
 
 
 #criar model marcador
 rails g scaffold marcadores nome
 
+#apagar app/assets/stylesheet/scaffold.scss
+
 #atualiza banco
 rake db:migrate
 
-#cria layout para model marcador
+#cria layout para resources marcadores
 rails g bootstrap:themed marcadores
 
 #incluir path no menu do application.html.erb(layout)
-	substituir link_to por menu_item
+#substituir link_to por menu_item
+=begin
+	<li><%= menu_item "Markers", markers_path  %></li>
+=end
 
 #apagar erros span do _form.html.erb, mudar pra vertical, alterar para <div class form-actions>, form-inputs
-
 
 #criar models noticias, primeiro campos sao os relacionamentos, usuario (no singular) :belongs_to (ou) :references
 rails g scaffold noticias usuario:belongs_to editoria:references titulo subtitulo conteudo:text data_publicacao:datetime imagem status:boolean
 
+#apagar app/assets/stylesheet/scaffold.scss
+
 #atualiza banco
 rake db:migrate
 
-#cria layout para model marcador
+#cria layout para resources marcadores
 rails g bootstrap:themed noticias
 
 #incluir path de noticias (noticias_path [na duvida, roda <rake routes> pra saber ver os path's] no application.html.erb(layout)
@@ -108,22 +122,20 @@ rails g bootstrap:themed noticias
 
 #apagar erros span do _form.html.erb, mudar pra vertical, alterar para <div class form-actions>, form-inputs
 
-#substituir tipo do status 
-as: :radio_buttons, collection: [['Publicado',true],['Nao publicado', false]]
-
-#alterar layout do genero app/views/users/_form.html.erb
+#substituir tipo do botao de staus no _form de posts
 =begin
-	<%= f.input :genero, as: :radio_buttons, collection: [['Masculino',1],['feminino',2]] %>
-=end
- 
-
-#relacionamentos
-=begin
-	<%= f.input :usuario_id, as: :select, collection: Usuario.all.map{|u| [u.nome, u.id] }, prompt: 'Selecione usuário'
+	<%= f.input :status, as: :radio_buttons, collection: [['Enabled', true],['Disabled',false]] %>
 =end
 
 
-#adicionar campo email
+### RELACIONAMENTOS
+#no _form de noticias
+=begin
+	<%= f.input :usuario_id, as: :select, collection: Usuario.all.map{|u| [u.nome, u.id] }, prompt: 'Selecione usuário' %>
+=end
+
+
+#adicionar campo email ()
 =begin
 	<%= f.input :usuario_id, as: :select, collection: Usuario.all.map{|u| ["#{u.nome} - {u.email}", u.id] }, prompt: 'Selecione usuário'
 =end
@@ -132,25 +144,29 @@ as: :radio_buttons, collection: [['Publicado',true],['Nao publicado', false]]
 #no model user.rb, adicionar/indicar relacionamento
 has_many :posts
 
-#agora, no _form.html.erb o relacionamento nao sera mais com f.input
+#agora, no _form.html.erb de noticias, o relacionamento nao sera mais com f.input
 =begin
 	<%= f.association :usuario, as: :select, collection: Usuario.all.map{|u| ["#{u.nome} - {u.email}", u.id] }, prompt: 'Selecione usuário'
 =end
 
 
 #na view show de posts, pegar nome em vez de id
-noticias.usuario.nome
+=begin
+	<dd><%= @post.user.name  %></dd>
+=end
 
 #na view index de post, retirar campos de conteudo, subtitulo, imagem para deixar mais limpo
-#na view show, validar usuario e editoria
+#na view show de post, validar usuario e editoria
 =begin
-	<%=noticias.usuario.nome if noticia.usuario.present? %>
-	<%=noticias.editoria.nome if noticia.editoria.present? %>
+	<%= @noticias.usuario.nome if @noticia.usuario.present? %>
+	<%= @noticias.editoria.nome if @noticia.editoria.present? %>
 =end
 
 #ou
-@noticia.usuario.try(:nome)
-@noticia.usuario.try(:nome)
+=begin
+	<%= @noticia.usuario.try(:nome) %>
+	<%= @noticia.editoria.try(:nome) %>
+=end
 
 #mais indicado (correto), validar no model noticia.rb
 validates :usuario_id, :editoria_id, presence: true
@@ -160,10 +176,7 @@ validates_presence_of :usuario_id, :editoria_id
 
 #usar ffaker
 #adicionar no gemfile: 'ffaker'
-#parar servidor e rodar:
 bundle install
-
-#reiniciar servidor
 
 #no seeds.rb
 Usuario.create(
@@ -195,10 +208,10 @@ bundle install
 
 #reiniciar servidor
 
-#na action index do controller
+#na action index do controller de usuarios
 @usuarios = Usuario.page(params[:page]).per(5)
 
-#na view de usuarios
+#na view index de usuarios, no fim do arquivo para ficar abaixo dos registros em uma <div class="text-center">
 =begin
 	<%= paginate @usuarios %>
 =end
@@ -218,24 +231,37 @@ rails g kaminari:views bootstrap3
 
 #agora nao precisa usar o per(5) no controller
 
-#gerar arquivo de configuracao do kaminari
+# pra configurar o numero de registros exibidos, gerar arquivo de configuracao do kaminari
 rails g kaminari:config
 
-#se quiser mudar o padrão de exibição de 25objetos do kaminari -> config/initializers/kaminari.rb
+#e mudar o padrão de exibição de 25 objetos do kaminari -> config/initializers/kaminari_config.rb
+#restart no seridor
 
-#exibir usuários no _form.html.erb da view users
+
+#selecionando usuarios na view _form de notcias
+#antes de configurar relacioamento, usando f.input
 =begin
-	<%= f.input :usuario_id, as: :select, collection: Usuario.all.map{|e| [e.nome, e.id] }, prompt: 'Selucione usuario' %>
+	<%= f.input :usuario_id, as: :select, collection: Usuario.all.map{|e| [e.nome, e.id] }, prompt: 'Selecione usuario' %>
 =end
 
-#ordenar lista de usuarios no _form.html.erb da view users
+#depois de configurar relacioamento usando f.association :usuario
 =begin
-	<%= f.input :usuario_id, as: :select, collection: Usuario.all.order('NOME ASC').map{|u| ["#{u.nome} - {u.email}", u.id] }, prompt: 'Selecione usuario'
+	<%= f.association :usuario, as: :select, collection: Usuario.all.map{|e| [e.nome, e.id] }, prompt: 'Selecione usuario' %>
 =end
 
+#alterar para ordenar lista de usuarios no _form.html.erb de noticias exibindo email na selecao
+#antes de configurar relacioamento usando f.input
+=begin
+	<%= f.input :usuario_id, as: :select, collection: Usuario.all.order(name: :asc).map{|u| ["#{u.nome} - {u.email}", u.id] }, prompt: 'Selecione usuario'
+=end
+
+#depois de configurar relacioamento f.association
+=begin
+	<%= f.association :usuario, as: :select, collection: Usuario.all.order(name: :asc).map{|e| [e.nome, e.id] }, prompt: 'Selecione usuario' %>
+=end
 
 #fazer relacionamento noticias e marcadores com base nas tabelas ja existentes
-rails g migrate create_marcadores_noticias marcador:belongs_to noticia:belongs_to
+rails g migration create_marcadores_noticias marcador:belongs_to noticia:belongs_to
 
 #atualiza bd
 rake db:migrate
@@ -243,7 +269,7 @@ rake db:migrate
 #no seeds.rb
 
 require 'ffaker'
-100.times.do 
+100.times do 
 	Usuario.create(
 		nome: FFaker::NameBR.name,
 		email: FFaker::Internet.email,
@@ -252,10 +278,10 @@ require 'ffaker'
 	)
 end
 
-editorias = Editoria.create!(
+editorias = Editoria.create!([
 	{nome: 'Politica'},
 	{nome: 'Economia'}
-)
+])
 
 marcadores = Marcador.create!([
 	{nome: 'Crise tal'},
@@ -265,7 +291,7 @@ marcadores = Marcador.create!([
 
 10.times do |i|
 	Noticias.create!(
-		usuario_id: usu. all.shuffle.first.id, ou
+		usuario_id: Usuario.all.shuffle.first.id, #ou usuario_id: Usuario.all.order('RAND()').first.id,
 		usuario_id: Usuario.all.order('RAND()').first.id,
 		editoria_id: Editoria.all.order('RAND()').first,
 		titulo: "Titulo #{i}",
@@ -283,18 +309,23 @@ end
 rake db:reset #apaga o banco, recria, e roda o seeds.rb
 
 
-#### realcionamento muitos pra muitos em marcadores e noticia
+#### relacionamento muitos pra muitos em marcadores e noticia
 	#no model noticia.rb
-	has_and_belongs_to_many: marcadores
+	has_and_belongs_to_many :marcadores
 
-	#em marcadores.rb
-	has_and_belongs_to_many: noticias
+	#model marcadores.rb
+	has_and_belongs_to_many :noticias
 
-#no _form.html.erb
-f.association: marcadores #cria campo select com os marcadores
+#no _form.html.erb de noticias exibir marcadores no form
+=begin
+	<%= f.association :marcadores, as: :check_boxes, collection: Marcador.all.order(nome: :asc).map {|m| [m.nome, m.id]} %>
+=end
 
-#faz a collection no _form.html.erb
-f.association: marcadores, as: :check_boxes, collection: Marcador.all.order(nome: :asc).map{|m| [m.nome, m.id]}, prompt "selecione marcador"
+
+#atera pra fazer collection no _form.html.erb de noticias
+f.association :marcadores, as: :check_boxes, collection: Marcador.all.order(nome: :asc).map{|m| [m.nome, m.id]}, prompt "selecione marcador"
 
 #problema, check box nao esta salvando
-#no strong parameters(params) no controller, adicionar :{:marcador_ids => []}
+#no strong parameters(params) no controller, adicionar {:marcador_ids => []}
+
+
